@@ -1,0 +1,75 @@
+name: Build and Publish Bottles
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  bottle:
+    name: Build bottle for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-14]  # arm64_tahoe (M1/M2/M3+)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Build on Homebrew
+        working-directory: ${{ github.workspace }}
+        run: |
+          brew tap haass/ardour-local "$(pwd)"
+          brew install --build-bottle --HEAD haass/ardour-local/ardour
+
+      - name: Generate bottle
+        run: |
+          brew bottle --json haass/ardour-local/ardour
+          ls -lh ardour--*.bottle.tar.gz
+
+      - name: Extract SHA256
+        id: extract_sha
+        run: |
+          SHA=$(sha256sum ardour--*.bottle.tar.gz | cut -d' ' -f1)
+          echo "sha256=${SHA}" >> $GITHUB_OUTPUT
+          echo "Bottle SHA256: ${SHA}"
+
+      - name: Upload bottle to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ardour--*.bottle.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment bottle stanza on release
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const bottleFile = fs.readdirSync('.').find(f => f.startsWith('ardour--') && f.endsWith('.bottle.tar.gz'));
+            const { execSync } = require('child_process');
+            const sha = execSync(`sha256sum ${bottleFile}`).toString().split(' ')[0];
+            const arch = 'arm64_tahoe';
+            
+            const comment = `## Bottle Built ✅
+            
+            Architecture: \`${arch}\`
+            File: \`${bottleFile}\`
+            SHA256: \`${sha}\`
+            
+            Add this to \`Formula/ardour.rb\`:
+            \`\`\`ruby
+            bottle do
+              sha256 ${arch}: "${sha}"
+            end
+            \`\`\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
