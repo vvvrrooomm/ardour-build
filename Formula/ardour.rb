@@ -72,7 +72,7 @@ class Ardour < Formula
         "obj.uselib   += ' OSX' #  -framework Cocoa -framework CoreFoundation -framework ApplicationServices\n        obj.defines += ['DISABLE_VISIBILITY']"
     end
 
-    system "./waf", "configure", "--boost-include=#{Formula["boost"].opt_include}", "--arm64", "--prefix=#{prefix}"
+    system "./waf", "configure", "--boost-include=#{Formula["boost"].opt_include}", "--arm64", "--prefix=#{prefix}", "--ptformat"
     system "./waf", "build"
     system "./waf", "install", "--destdir=#{buildpath}/dist"
 
