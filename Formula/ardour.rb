@@ -10,6 +10,10 @@ class Ardour < Formula
     sha256 "537b8252834b33c008d61f034d32f7c05903b1ff27a49053bbd4fc2bde5ad450"
   end
 
+  bottle do
+    sha256 arm64_tahoe: "45e9f7cd5dc8d1aa86c7cabcd6eb9e9a6dc2692c6294727c6aa0b57883b02202"
+  end
+
   depends_on "python@3"
   depends_on "boost"
   depends_on "pkg-config"
