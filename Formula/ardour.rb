@@ -68,6 +68,15 @@ class Ardour < Formula
     # Move installed tree into prefix
     prefix.install Dir["dist/*"]
 
+    # The installation step currently places files under a nested
+    # opt/homebrew/Cellar/ardour/HEAD-<rev> directory; flatten it so
+    # executables live directly under `prefix/bin`.
+    nested = prefix/"opt/homebrew/Cellar/ardour/HEAD-#{version.commit}"
+    if nested.exist?
+      (nested.children).each { |c| prefix.install c }
+      nested.rmtree
+    end
+
     # Add runtime rpath to any executables and fix dylib ids
     if OS.mac?
       mach_o_magics = ["\xFE\xED\xFA\xCE", "\xCE\xFA\xED\xFE", "\xFE\xED\xFA\xCF", "\xCF\xFA\xED\xFE"]
