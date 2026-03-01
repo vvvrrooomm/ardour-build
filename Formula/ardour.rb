@@ -3,9 +3,6 @@ class Ardour < Formula
   homepage "https://ardour.org"
   head "https://github.com/Ardour/ardour.git"
 
-  # use the generic python3 dependency so Homebrew can upgrade to newer
-  # patch versions automatically; the `python@3` alias points to the current
-  # supported 3.x release.
   depends_on "python@3"
   depends_on "boost"
   depends_on "pkg-config"
