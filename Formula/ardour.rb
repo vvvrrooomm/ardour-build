@@ -92,6 +92,8 @@ class Ardour < Formula
   end
 
   test do
-    assert_predicate bin, :exist?
+    # basic smoke test: ensure executable runs and prints version
+    output = shell_output("#{bin}/ardour9 --version")
+    assert_match "Ardour", output
   end
 end
