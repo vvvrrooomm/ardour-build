@@ -105,4 +105,49 @@ class Ardour < Formula
     output = shell_output("#{bin}/ardour9 --version")
     assert_match "Ardour", output
   end
+
+  def post_install
+    # create a minimal .app bundle so the application can be launched from
+    # Finder/Dock with an icon
+    app = prefix/"Ardour.app"
+    contents = app/"Contents"
+    resources = contents/"Resources"
+    macos = contents/"MacOS"
+
+    resources.mkpath
+    macos.mkpath
+
+    # install one of the provided PNG icons (GTK will fall back to this)
+    icon_src = prefix/"share/ardour9/resources/Ardour-icon_512px.png"
+    resources.install icon_src => "Ardour.png" if icon_src.exist?
+
+    # Info.plist describing the bundle
+    (contents/"Info.plist").write <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>CFBundleName</key>
+        <string>Ardour</string>
+        <key>CFBundleExecutable</key>
+        <string>ardour9</string>
+        <key>CFBundleIconFile</key>
+        <string>Ardour.png</string>
+        <key>CFBundleIdentifier</key>
+        <string>org.ardour.Ardour</string>
+        <key>CFBundleVersion</key>
+        <string>#{version}</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+      </dict>
+      </plist>
+    EOS
+
+    # launcher stub that calls real binary
+    (macos/"ardour9").write <<~EOS
+      #!/bin/bash
+      exec "#{bin}/ardour9" "$@"
+    EOS
+    chmod 0755, macos/"ardour9"
+  end
 end
