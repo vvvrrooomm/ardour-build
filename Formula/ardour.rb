@@ -3,6 +3,13 @@ class Ardour < Formula
   homepage "https://ardour.org"
   head "https://github.com/Ardour/ardour.git"
 
+  stable do
+    # Example stable release tarball from GitHub tags. Update version and
+    # sha256 to a specific release when publishing a bottle.
+    url "https://github.com/Ardour/ardour/archive/refs/tags/9.2.tar.gz"
+    sha256 "537b8252834b33c008d61f034d32f7c05903b1ff27a49053bbd4fc2bde5ad450"
+  end
+
   depends_on "python@3"
   depends_on "boost"
   depends_on "pkg-config"
