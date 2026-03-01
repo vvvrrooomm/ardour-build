@@ -106,6 +106,14 @@ class Ardour < Formula
     assert_match "Ardour", output
   end
 
+  def caveats
+    <<~EOS
+      A minimal macOS application bundle has been created at:
+        #{opt_prefix}/Ardour.app
+      You can open it directly or move it to /Applications for easier access.
+    EOS
+  end
+
   def post_install
     # create a minimal .app bundle so the application can be launched from
     # Finder/Dock with an icon
